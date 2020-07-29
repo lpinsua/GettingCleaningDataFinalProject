@@ -68,6 +68,9 @@ summary <- summarize(traintest,mean(mean),mean(stdev))
 
 
 ###### FINAL RESULTS
+## Look at the tidy datasets
 head(traintest)
 head(summary)
-
+## Export them to .csv files
+write.csv(traintest,file="traintest.csv")
+write.csv(summary,file="summary.csv")
