@@ -72,5 +72,5 @@ summary <- summarize(traintest,mean(mean),mean(stdev))
 head(traintest)
 head(summary)
 ## Export them to .csv files
-write.csv(traintest,file="traintest.csv")
-write.csv(summary,file="summary.csv")
+write.table(traintest,file="traintest.txt")
+write.table(summary,file="summary.txt")
