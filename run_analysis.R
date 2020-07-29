@@ -1,76 +1,64 @@
-#### John's Hopkins University
-#### Data Science Specialization
-#### Getting and Cleaning Data
-#### Final Course Project
-#### Luis Pedro Insua
+### John's Hopkins University
+### Data Science Specialization
+### Getting and Cleaning Data
+### Final Course Project
+### Luis Pedro Insua
 
-### Load required packages
+######################### SETUP AND PREPARATION ##############################
+
 library(dplyr)
-
-##### Downloading data
 
 ## Download data as zip, then unzip inside working directory
 url <- "https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip"
 download.file(url, destfile = "data.zip")
 unzip("data.zip")
 
-
-##### Loading and preparing test data
-
-## Read complete test table
-testdata <- read.table(".\\UCI HAR Dataset\\test\\X_test.txt")
-## Calculate means and standard deviations for each measurement
-testmeans <- rowMeans(testdata)
-teststdevs <- apply(testdata,1,FUN=sd)
-testactivity <- read.table(".\\UCI HAR Dataset\\test\\y_test.txt")
-testsubject <- read.table(".\\UCI HAR Dataset\\test\\subject_test.txt")
-## Create dataframe with means and stdevs, then give columns friendlier names
-test <- data.frame(testsubject,testactivity,testmeans,teststdevs)
-names(test)<- c("subject","activity","mean","stdev")
+## Read files and assign dataframes
+features <- read.table(".\\UCI HAR Dataset\\features.txt",col.names = c("n","variable"))
+activities <- read.table(".\\UCI HAR Dataset\\activity_labels.txt",col.names=c("activityCode","activity"))
+subject_test <- read.table(".\\UCI HAR Dataset\\test\\subject_test.txt",col.names="subject")
+X_test <- read.table(".\\UCI HAR Dataset\\test\\X_test.txt",col.names=features$variable)
+y_test <- read.table(".\\UCI HAR Dataset\\test\\y_test.txt",col.names="activityCode")
+subject_train <- read.table(".\\UCI HAR Dataset\\train\\subject_train.txt",col.names="subject")
+X_train <- read.table(".\\UCI HAR Dataset\\train\\X_train.txt",col.names=features$variable)
+y_train <- read.table(".\\UCI HAR Dataset\\train\\y_train.txt",col.names="activityCode")
 
 
-##### Loading and preparing train data
 
-## Read complete train table
-traindata <- read.table(".\\UCI HAR Dataset\\train\\X_train.txt")
-## Calculate means and standard deviations for each measurement
-trainmeans <- rowMeans(traindata)
-trainstdevs <- apply(traindata,1,FUN=sd)
-trainactivity <- read.table(".\\UCI HAR Dataset\\train\\y_train.txt")
-trainsubject <- read.table(".\\UCI HAR Dataset\\train\\subject_train.txt")
-## Create dataframe with means and stdevs, then give columns friendlier names
-train <- data.frame(trainsubject,trainactivity,trainmeans,trainstdevs)
-names(train)<- c("subject","activity","mean","stdev")
+############################## STEPS 1 - 5 ###################################
 
+## STEP 1: Merges the training and the test sets to create one data set.
+X <- rbind(X_train,X_test)
+Y <- rbind(y_train,y_test)
+subject <- rbind(subject_train,subject_test)
+merged <- cbind(subject, Y, X)
 
-##### 1) Merging taining and test sets into one dataset
-traintest <- rbind(train,test)
+## STEP 2: Extracts only the measurements on the mean and standard deviation 
+##         for each measurement.
+extracted <- merged %>% select(subject, activityCode, contains("mean"),
+                               contains("std"))
+## STEP 3: Uses descriptive activity names to name the activities 
+##         in the data set.
+extracted$activityCode <- activities[extracted$activityCode,2]
 
-
-##### 3) Use descriptive activity names to name the activities in the data set
-
-## Load activity label data
-activitylabels <- read.table(".\\UCI HAR Dataset\\activity_labels.txt")
-names(activitylabels) <- c("code","activityName")
-## Add activity names to the dataframe
-traintest<-left_join(traintest,activitylabels, by=c("activity"="code"))
-head(traintest)
-# Select only necessary variables
-traintest <- select(traintest,activityName,subject, mean, stdev)
-
-
-##### 5) Tidy summary
-
-## Group dataframe by subject and activity
-traintest <- group_by(traintest,activityName,subject)
-## Create summary with averages by activity and subject
-summary <- summarize(traintest,mean(mean),mean(stdev))
+## STEP 4: Appropriately labels the data set with descriptive variable names.
+names(extracted)[2] <- "activity"
+names(extracted) <- gsub("^t","time",names(extracted))
+names(extracted) <- gsub("^f","freq",names(extracted))
+names(extracted) <- gsub("\\.","",names(extracted))
+names(extracted) <- gsub("std","STD",names(extracted))
+names(extracted) <- gsub("gravity","Gravity",names(extracted))
+names(extracted) <- gsub("mean","Mean",names(extracted))
+names(extracted) <- gsub("^anglet","angleTime",names(extracted))
+names(extracted) <- gsub("Acc","Accelerometer",names(extracted))
+names(extracted) <- gsub("Gyro","Gyroscope",names(extracted))
 
 
-###### FINAL RESULTS
-## Look at the tidy datasets
-head(traintest)
-head(summary)
-## Export them to .csv files
-write.table(traintest,file="traintest.txt")
-write.table(summary,file="summary.txt")
+## STEP 5: From the data set in step 4, creates a second, independent tidy 
+##         data set with the average of each variable for each activity and 
+##         each subject.
+summary <- extracted %>% group_by(subject,activity) %>%
+                summarize_all(funs(mean))
+
+## Export table to a txt file
+write.table(summary,file="summary.txt",row.names = FALSE)
