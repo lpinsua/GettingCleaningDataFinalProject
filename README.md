@@ -8,7 +8,9 @@ The data represent data collected from the accelerometers from the Samsung Galax
 
 This project contains the following files:
 
+"Code_Book": Describes the data, its variables and tranformations done to them.
 "run_analysis.r": This script downloads data directly from the source, then merges it and transforms it into a summarized tidy dataset.
+"summary.txt": A tidy dataset created from the run_analysisi.r script.
 
-"Code_Book.md": Describes the data, its variables and tranformations done to them.
+
   
