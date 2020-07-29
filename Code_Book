@@ -1,0 +1,25 @@
+Code Book
+
+
+features: contains the names for all the 561 variables collected.
+activities: containts activity names and codes for the 6 activities observed.
+subject_test: contains a vector of the subject for every observation of the test set.
+X_test: contains the values collected for all observations for all variables of the test set.
+y_test: contains the activity code for for every row of X_test.
+subject_train: contains a vector of the subject for every observation of the train set.
+X_train: contains the values collected for all observations for all variables of the train set.
+y_train: contains the activity code for for every row of X_test.
+X: binds X_train and X_test.
+Y: binds Y_train and Y_test.
+subject: binds subject_train and subject_test.
+merged: merges subject, Y, and X. This is the dataframe that contains all the oservations, together with the subject and activity info.
+extracted: extracts the subject, activity, and all the variables that contain a mean or standard deviation operation.
+summary: summarizes the extracted dataframe by subject and activity
+
+The steps followed to create the final "summary" tidy dataset were:
+
+1) Merges the training and the test sets to create one data set.
+2) Extracts only the measurements on the mean and standard deviation for each measurement.
+3) Uses descriptive activity names to name the activities in the data set
+4) Appropriately labels the data set with descriptive variable names.
+5) From the data set in step 4, creates a second, independent tidy data set with the average of each variable for each activity and each subject.
